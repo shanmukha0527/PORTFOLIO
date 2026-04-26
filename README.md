@@ -1,4 +1,4 @@
-# FUTURE_FS_01
+
 📖 About
 A modern, responsive portfolio website showcasing my skills, projects, and professional journey as a Full-Stack Developer and Technology Enthusiast. Built with vanilla HTML, CSS, and JavaScript, featuring smooth animations, interactive elements, and a clean, professional design.
 ✨ Features
