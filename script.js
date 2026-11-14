@@ -21,9 +21,11 @@ document.addEventListener('DOMContentLoaded', function () {
 // Navigation Functions
 function initializeNavigation() {
   navMenuToggle.addEventListener('click', toggleMobileMenu);
+
   navLinks.forEach(link => {
     link.addEventListener('click', handleNavClick);
   });
+
   document.addEventListener('click', function (e) {
     if (!navMenu.contains(e.target) && !navMenuToggle.contains(e.target)) {
       closeMobileMenu();
@@ -61,6 +63,7 @@ function initializeScrollDetection() {
 function handleScroll() {
   const sections = ['home', 'about', 'skills', 'projects', 'contact'];
   const scrollPosition = window.pageYOffset + 100;
+
   for (const sectionId of sections) {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -90,22 +93,79 @@ function updateActiveNavLink(sectionId) {
 function scrollToSection(sectionId) {
   const element = document.getElementById(sectionId);
   if (element) {
-    const offsetTop = element.offsetTop - 64;
-    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+    const offsetTop = element.offsetTop - 64; // matches the 4rem navbar
+    window.scrollTo({
+      top: offsetTop,
+      behavior: 'smooth',
+    });
   }
+}
+
+// Contact Form Functions
+function handleFormSubmit(e) {
+  e.preventDefault();
+
+  const formData = new FormData(contactForm);
+  const name = formData.get('name').trim();
+  const email = formData.get('email').trim();
+  const message = formData.get('message').trim();
+
+  if (!name || !email || !message) {
+    showFormStatus('Please fill in all fields', 'error');
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    showFormStatus('Please enter a valid email address', 'error');
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+  setTimeout(() => {
+    showFormStatus("Message sent successfully! I'll get back to you soon.", 'success');
+    contactForm.reset();
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>';
+
+    setTimeout(() => hideFormStatus(), 5000);
+  }, 1500);
+}
+
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function showFormStatus(message, type) {
+  formStatus.textContent = message;
+  formStatus.className = `form-status ${type}`;
+  formStatus.style.display = 'block';
+}
+
+function hideFormStatus() {
+  formStatus.style.display = 'none';
+  formStatus.className = 'form-status';
 }
 
 // Animation Functions
 function initializeAnimations() {
-  const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px',
+  };
+
   const observer = new IntersectionObserver(handleIntersection, observerOptions);
+
   const elementsToAnimate = document.querySelectorAll(
     '.skill-card, .project-card, .info-item, .detail-card, .contact-item'
   );
+
   elementsToAnimate.forEach(el => {
     el.style.opacity = '0';
-    el.style.transform = 'translateY(25px)';
-    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     observer.observe(el);
   });
 }
@@ -123,13 +183,27 @@ function handleIntersection(entries) {
 function addScrollToTop() {
   const scrollToTopBtn = document.createElement('button');
   scrollToTopBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+  scrollToTopBtn.className = 'scroll-to-top';
   scrollToTopBtn.style.cssText = `
-    position:fixed;bottom:20px;right:20px;width:44px;height:44px;
-    border-radius:10px;background:#4f8eff;color:white;border:none;
-    cursor:pointer;opacity:0;visibility:hidden;transition:all 0.3s ease;
-    z-index:1000;box-shadow:0 4px 20px rgba(79,142,255,0.4);font-size:0.9rem;
-  `;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #4f8eff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(79, 142, 255, 0.35);
+    `;
+
   document.body.appendChild(scrollToTopBtn);
+
   window.addEventListener('scroll', () => {
     if (window.pageYOffset > 300) {
       scrollToTopBtn.style.opacity = '1';
@@ -139,11 +213,16 @@ function addScrollToTop() {
       scrollToTopBtn.style.visibility = 'hidden';
     }
   });
+
   scrollToTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
   });
 }
 
+// Utility Functions
 function debounce(func, wait) {
   let timeout;
   return function (...args) {
@@ -157,31 +236,71 @@ const debouncedScrollHandler = debounce(handleScroll, 10);
 // Loading Spinner
 function showLoadingAnimation() {
   const loader = document.createElement('div');
-  loader.innerHTML = '<div style="width:44px;height:44px;border:2px solid #1e1e35;border-top:2px solid #4f8eff;border-radius:50%;animation:spin 0.8s linear infinite;"></div>';
-  loader.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0f;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s ease;`;
+  loader.className = 'page-loader';
+  loader.innerHTML = '<div class="loader-spinner"></div>';
+  loader.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0a0a0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+  `;
+
+  const spinner = loader.querySelector('.loader-spinner');
+  spinner.style.cssText = `
+      width: 50px;
+      height: 50px;
+      border: 3px solid #1e1e35;
+      border-top: 3px solid #4f8eff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+  `;
+
   const style = document.createElement('style');
-  style.textContent = '@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}';
+  style.textContent = `
+      @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+  `;
   document.head.appendChild(style);
   document.body.appendChild(loader);
+
   window.addEventListener('load', () => {
     setTimeout(() => {
       loader.style.opacity = '0';
-      setTimeout(() => { loader.remove(); style.remove(); }, 500);
-    }, 400);
+      setTimeout(() => {
+        loader.remove();
+        style.remove();
+      }, 500);
+    }, 500);
   });
 }
 
-if (document.readyState === 'loading') { showLoadingAnimation(); }
+if (document.readyState === 'loading') {
+  showLoadingAnimation();
+}
 
-window.addEventListener('error', function (e) { console.error('Error:', e.error); });
+// Global Error Handling
+window.addEventListener('error', function (e) {
+  console.error('JavaScript Error:', e.error);
+});
 
+// Prevent form resubmission
 if (window.history.replaceState) {
   window.history.replaceState(null, null, window.location.href);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.location.hash === '#thankyou') {
-    const thankyouSection = document.getElementById('thankyou');
-    if (thankyouSection) thankyouSection.classList.remove('hidden');
-  }
+    if (window.location.hash === '#thankyou') {
+        const thankyouSection = document.getElementById('thankyou');
+        thankyouSection.classList.remove('hidden');
+        scrollToSection('thankyou');
+    }
 });
